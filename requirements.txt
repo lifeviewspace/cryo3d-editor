@@ -1,0 +1,16 @@
+# Core runtime dependencies for napari-cryo3d-editor
+napari>=0.4.18
+numpy
+scipy
+scikit-image
+qtpy
+mrcfile
+imageio
+imageio-ffmpeg
+tifffile
+
+# A Qt backend is required by napari (install one):
+PyQt5
+
+# Optional GPU acceleration (CUDA 12.x) — uncomment if you have an NVIDIA GPU:
+# cupy-cuda12x

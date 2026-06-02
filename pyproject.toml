@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "napari-cryo3d-editor"
+version = "3.0.0"
+description = "napari plugin for 3D cryo-ET visualization, label post-processing, and movie production"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "BSD-3-Clause" }
+authors = [{ name = "Kennedy Bonjour" }]
+keywords = ["napari", "cryo-ET", "tomography", "segmentation", "visualization"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: napari",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Image Processing",
+]
+dependencies = [
+    "napari>=0.4.18",
+    "numpy",
+    "scipy",
+    "scikit-image",
+    "qtpy",
+    "mrcfile",
+    "imageio",
+    "imageio-ffmpeg",
+    "tifffile",
+]
+
+[project.optional-dependencies]
+gpu = ["cupy-cuda12x"]
+all = ["pyqt5"]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/lifeviewspace/Cryo3d-editor/issues"
+"Source Code" = "https://github.com/lifeviewspace/Cryo3d-editor"
+
+[project.entry-points."napari.manifest"]
+napari-cryo3d-editor = "napari_cryo3d_editor:napari.yaml"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+napari_cryo3d_editor = ["napari.yaml"]

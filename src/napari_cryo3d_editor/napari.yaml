@@ -1,0 +1,10 @@
+name: napari-cryo3d-editor
+display_name: Cryo3D Editor
+contributions:
+  commands:
+    - id: napari-cryo3d-editor.make_widget
+      python_name: napari_cryo3d_editor._widget:cryo3d_editor_widget
+      title: Open Cryo3D Editor
+  widgets:
+    - command: napari-cryo3d-editor.make_widget
+      display_name: Cryo3D Editor
