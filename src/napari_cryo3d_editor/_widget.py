@@ -587,14 +587,33 @@ class PluginState:
                 return
             except Exception:
                 pass
-        layer.color = {k: self._rgba_float_to_int(v) for k, v in colors.items()}
+        # Legacy fallback (napari <= 0.4.x); Labels.color removed in 0.5+.
+        try:
+            layer.color = {k: self._rgba_float_to_int(v) for k, v in colors.items()}
+        except Exception:
+            pass
 
     def reset_colors(self, layer_name):
         self.label_colors.pop(layer_name, None)
         self.label_opacities.pop(layer_name, None)
         layer = self.get_labels_layer(layer_name)
-        if layer:
-            layer.colormap = 'auto'
+        if layer is None:
+            return
+        # napari 0.7 removed the 'auto' string shortcut for Labels
+        # colormaps (it now tries to read it as a color sequence and
+        # raises KeyError: 'colors'). Regenerate a fresh cyclic colormap
+        # instead, with fallbacks across napari versions.
+        try:
+            from napari.utils.colormaps import label_colormap
+            layer.colormap = label_colormap(49)
+        except Exception:
+            try:
+                layer.new_colormap()          # napari >= 0.4.19
+            except Exception:
+                try:
+                    layer.colormap = 'auto'   # legacy napari <= 0.4.18
+                except Exception:
+                    pass
 
     def initialize_layer_colors(self, layer_name):
         layer = self.get_labels_layer(layer_name)
@@ -1409,7 +1428,18 @@ class EraseTab(QWidget):
         self.state.erase_layer = self.state.viewer.add_labels(
             np.zeros(shape, dtype=np.uint8), name="Erase_Mask",
             scale=self.state.scale(), opacity=0.5)
-        self.state.erase_layer.color = {1: 'red', 0: 'transparent'}
+        # napari 0.5+ removed Labels.color; use a DirectLabelColormap.
+        try:
+            from napari.utils.colormaps import DirectLabelColormap
+            self.state.erase_layer.colormap = DirectLabelColormap(
+                color_dict={1: (1.0, 0.0, 0.0, 1.0),
+                            0: (0.0, 0.0, 0.0, 0.0),
+                            None: (0.0, 0.0, 0.0, 0.0)})
+        except Exception:
+            try:
+                self.state.erase_layer.color = {1: 'red', 0: 'transparent'}
+            except Exception:
+                pass
         self.state.viewer.layers.selection.active = self.state.erase_layer
         self.state.erase_layer.mode = 'paint'
         self.state.erase_layer.selected_label = 1
