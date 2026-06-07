@@ -67,13 +67,16 @@ several files at once.
 Once loaded, the layer list (bottom-left) shows your layers and the canvas shows
 one Z-slice of the volume. Scroll to move through Z.
 
-![Tomogram and segmentation loaded in napari](images/tut/img3.png)
-
 > **Image vs Labels.** An **Image** layer is the raw greyscale density. A
 > **Labels** layer is the segmentation: integers where `0` = background and
 > `1, 2, 3…` are different objects. Most cleanup tools act on **Labels**.
 > If a segmentation loads as an Image, right-click it in the layer list and
 > choose **Convert to Labels**.
+
+As shown below, your loaded layers appear in the list on the left; the topmost
+layer is drawn on top in the canvas.
+
+![Tomogram and segmentation loaded in napari](images/tut/img3.png)
 
 ![Right-click layer menu](images/tut/img4.png)
 
@@ -94,9 +97,16 @@ layer you want to work on in each tab's selector first.
 
 ![Cryo3D Editor panel open (Dust tab) next to the data](images/tut/img8.png)
 
-> **Tip — navigation demo.** Scroll through Z and inspect the segmentation:
->
-> ![Animated demo of navigating the data](images/plugin_demo.gif)
+> **Notice the layer dropdown** in the plugin panel (top-left of the screenshot
+> above) — use it to select which layer you're working on.
+
+> **Tip — each tab has its own layer selector.** You can work on different
+> layers in different tabs; selecting a layer in one tab doesn't change the
+> others.
+
+![Animated demo of navigating the data](images/plugin_demo.gif)
+*Navigate through Z-slices by scrolling to explore the full 3D volume. This helps
+you understand your data structure before editing.*
 
 ---
 
