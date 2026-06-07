@@ -138,13 +138,13 @@ export → optional animation (Movie).
 **Why:** automatic segmentations contain tiny specks ("dust") and structures
 that are too thick. This tab cleans both.
 
-1. **1 ▸ Load & Select** — click **Load Segmentation…** or pick a Labels
+1. **Load & Select** — click **Load Segmentation…** or pick a Labels
    layer in the dropdown. Use the **refresh** button to update the list.
-2. **2 ▸ Performance** — tick **Use GPU** only if you have an NVIDIA GPU.
-3. **3 ▸ Erode Thickness** — set the erosion percentage to shrink each object;
+2. **Performance** — tick **Use GPU** only if you have an NVIDIA GPU.
+3. **Erode Thickness** — set the erosion percentage to shrink each object;
    tick **Remove if <** to delete objects that vanish. Click **Preview**,
    then **Apply**.
-4. **4 ▸ Hide Dust** — choose a **metric** (`volume`, `area`, `size`, or their
+4. **Hide Dust** — choose a **metric** (`volume`, `area`, `size`, or their
    `rank` versions), set the threshold, then **Analyze** → **Preview** →
    **Apply**.
 
@@ -174,13 +174,13 @@ real structures are kept.*
 **Why:** some errors are in the wrong place, not just small. Paint a mask by hand
 and delete whatever it covers.
 
-1. **1 ▸ Select Layer** — choose the Labels layer.
-2. **2 ▸ Paint Mask** — click **Create Mask**; a red mask layer appears in
+1. **Select Layer** — choose the Labels layer.
+2. **Paint Mask** — click **Create Mask**; a red mask layer appears in
    paint mode. Drag on the canvas to paint over regions to remove.
    **Clear Mask** starts over.
-3. **3 ▸ Z Range** — tick **All Z slices**, or set start/end slices to limit the
+3. **Z Range** — tick **All Z slices**, or set start/end slices to limit the
    depth range.
-4. **4 ▸ Actions** — click **Apply Erase** to delete the painted voxels;
+4. **Actions** — click **Apply Erase** to delete the painted voxels;
    **Undo** reverts.
 
 > **Brush controls.** While the mask layer is active, change the **brush size**
@@ -227,16 +227,16 @@ updates live.*
 **Why:** the same data looks flat or striking depending on contrast, lighting and
 rendering mode. This tab also exports your results.
 
-1. **1 ▸ Select Layer** (Image or Labels).
-2. **2 ▸ Contrast / Opacity & Gamma** — adjust the sliders; **Auto Contrast**
+1. **Select Layer** (Image or Labels).
+2. **Contrast / Opacity & Gamma** — adjust the sliders; **Auto Contrast**
    picks good limits. For Labels, the sliders control opacity.
-3. **3 ▸ Rendering Mode (3D)** — `mip`, `translucent`, `attenuated_mip`, `iso`,
+3. **Rendering Mode (3D)** — `mip`, `translucent`, `attenuated_mip`, `iso`,
    `average`, `minip`. Set ISO threshold / attenuation when relevant.
-4. **4 ▸ Colormap** — pick a colour scheme for Image layers.
-5. **5 ▸ Membrane Presets** — **Membrane**, **Dense Volume**,
+4. **Colormap** — pick a colour scheme for Image layers.
+5. **Membrane Presets** — **Membrane**, **Dense Volume**,
    **ISO Surface**, or **Reset to Default**.
-6. **6 ▸ Save Snapshot as TIFF** — tick **Canvas only**, then **Save Snapshot…**.
-7. **7 ▸ Save as MRC** — tick **Binary mask** to save Labels as 0/1, then
+6. **Save Snapshot as TIFF** — tick **Canvas only**, then **Save Snapshot…**.
+7. **Save as MRC** — tick **Binary mask** to save Labels as 0/1, then
    **Save as MRC…**.
 
 | Rendering mode | Best for |
@@ -271,15 +271,15 @@ listed and the preview/export buttons at the bottom.*
 
 **Keyframe Movie** — animate a camera path between viewpoints you choose.
 
-1. **1 ▸ Capture Keyframes** — set the 3D view (rotate, zoom, pick the slice),
+1. **Capture Keyframes** — set the 3D view (rotate, zoom, pick the slice),
    then click **Capture Current State**. Repeat for each viewpoint; the panel
    shows a thumbnail per keyframe (KF 1, KF 2, …). You need **at least two**.
-2. **2 ▸ Keyframes** — reorder with **up/down arrows**, replace one with **Update
+2. **Keyframes** — reorder with **up/down arrows**, replace one with **Update
    Selected**, set **Duration** (frames between this keyframe and the next), or
    **Clear All**.
-3. **3 ▸ Settings** — **Format** (`MP4`, `GIF`, `PNG Sequence`), **Interpolation**
+3. **Settings** — **Format** (`MP4`, `GIF`, `PNG Sequence`), **Interpolation**
    (`Smoothstep`, `Linear`, `Ease-in`, `Ease-out`), and **FPS**.
-4. **4 ▸ Preview & Export** — **Preview** plays the path on the canvas (**Stop**
+4. **Preview & Export** — **Preview** plays the path on the canvas (**Stop**
    to interrupt). When happy, click **Export Movie…** and choose where to save.
 
 ![Keyframe preview](images/tut/movie_preview.gif)
@@ -294,8 +294,8 @@ interpolation, previewing and exporting.
 
 **Spin Movie** — one-click automatic 360° turntable.
 
-1. **1 ▸ Rotation Settings** — pick the axis (`Y`, `X`, `Z`) and output format.
-2. **2 ▸ Export** — click **Start Spin Movie…**. **Cancel** stops it.
+1. **Rotation Settings** — pick the axis (`Y`, `X`, `Z`) and output format.
+2. **Export** — click **Start Spin Movie…**. **Cancel** stops it.
 
 > **Set up the look first** in the Render tab — the movie records exactly what is
 > on the canvas (colours, opacity, rendering mode).
@@ -330,7 +330,7 @@ Use **Undo** freely at any stage.
 | Plugin missing from the Plugins menu | Re-run `pip install -e .` in the active environment |
 | 3D view is slow or hangs on large volumes | Switch to 2D, reduce canvas size, or crop the region |
 | Colours look wrong after editing (napari 0.7) | Press **Reset Colors**; make sure you're on the latest version |
-| Movie export fails or the MP4 won't play | Make sure `imageio-ffmpeg` is installed; check the terminal for the printed traceback. Frames are auto-resized to even dimensions, so a mid-export crash is usually a missing ffmpeg backend |
+| Movie export fails or the MP4 won't play | Make sure `imageio-ffmpeg` is installed; check the terminal for the printed traceback. Frames are auto-resized to even dimensions, so a mid-export crash may leave them partially written. |
 | Exported video is blank/grey | The movie records the canvas — set the view in **Render** first and keep the napari window visible during export |
 
 ---
