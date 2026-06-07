@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Using the Cryo3D Editor — napari Plugin User Guide</title>
+<style>
+  :root{
+    --bg:#0f1620; --panel:#16202c; --panel2:#1b2735; --ink:#e8eef5;
+    --dim:#9fb0c3; --line:#2a3a4d; --accent:#4ea1ff; --accent2:#7c5cff;
+    --blue:#2f6fed; --purple:#7c5cff; --green:#2bb673; --amber:#e0a32e; --red:#e0533d;
+    --code-bg:#0b1118; --code-ink:#bfe3ff; --maxw:880px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.65;font-size:16px}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:32px 22px 80px}
+  h1,h2,h3{line-height:1.25;font-weight:700}
+  h1{font-size:30px;margin:0 0 6px}
+  h2{font-size:23px;margin:46px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+  h3{font-size:18px;margin:26px 0 10px;color:#cfe1f5}
+  p{margin:12px 0}
+  a{color:var(--accent)}
+  code{font-family:"SF Mono",Menlo,Consolas,"Courier New",monospace;
+    background:#10202e;color:var(--code-ink);padding:2px 6px;border-radius:5px;font-size:13.5px}
+  pre{background:var(--code-bg);border:1px solid var(--line);border-left:4px solid var(--accent);
+    border-radius:10px;padding:16px 18px;overflow:auto;margin:14px 0}
+  pre code{background:none;color:#cfeaff;padding:0;font-size:13.5px;line-height:1.7}
+  .cmt{color:#5f7693}
+  .cover{background:linear-gradient(135deg,#16202c,#11304a);border:1px solid var(--line);
+    border-radius:16px;padding:30px 28px;margin-bottom:8px}
+  .badge{display:inline-block;background:#11304a;border:1px solid var(--accent);
+    color:var(--accent);font-size:12px;font-weight:600;padding:3px 11px;border-radius:20px;margin-bottom:14px}
+  .sub{color:var(--dim);font-size:15px;margin-top:4px}
+  .objbox{background:var(--panel2);border-radius:12px;padding:16px 20px;margin-top:20px}
+  .objbox h3{margin-top:0;color:var(--accent)}
+  .objbox ul{margin:8px 0 0;padding-left:20px}
+  .objbox li{margin:6px 0}
+  nav.toc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 22px;margin:24px 0}
+  nav.toc strong{color:var(--accent);font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  nav.toc ol{margin:10px 0 0;padding-left:22px}
+  nav.toc li{margin:5px 0}
+  nav.toc a{text-decoration:none}
+  .call{border-radius:10px;padding:13px 16px;margin:16px 0;border-left:5px solid;background:var(--panel)}
+  .call .t{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:4px;text-transform:uppercase}
+  .call p{margin:4px 0}
+  .key{border-color:var(--blue)} .key .t{color:#6fa8ff}
+  .imp{border-color:var(--amber)} .imp .t{color:var(--amber)}
+  .out{border-color:var(--green)} .out .t{color:#46d394}
+  .warn{border-color:var(--red)} .warn .t{color:#ff7a63}
+  .note{border-color:var(--purple)} .note .t{color:#a48bff}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;background:var(--panel);border-radius:10px;overflow:hidden}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#10283c;color:#bfe0ff;font-size:12.5px;text-transform:uppercase;letter-spacing:.03em}
+  tr:last-child td{border-bottom:none}
+  tr:nth-child(even) td{background:#13202d}
+  figure{margin:22px 0;text-align:center}
+  figure svg,figure img{max-width:100%;height:auto;background:#0b0f14;border-radius:12px;border:1px solid var(--line)}
+  figure img{display:block;margin:0 auto}
+  figcaption{color:var(--dim);font-size:13.5px;font-style:italic;margin-top:8px}
+  .tabchip{display:inline-block;font-weight:700;border-radius:8px;padding:2px 10px;font-size:13px;margin-right:4px}
+  .c-dust{background:#3a2e12;color:#e8c46a;border:1px solid #6a571f}
+  .c-erase{background:#37231f;color:#ef9a86;border:1px solid #6a3a30}
+  .c-color{background:#2a1f3c;color:#c3a6ff;border:1px solid #4d3a70}
+  .c-render{background:#11304a;color:#7cc1ff;border:1px solid #2f6fed}
+  .c-movie{background:#11332a;color:#5fd6a6;border:1px solid #2bb673}
+  ol li,ul li{margin:7px 0}
+  kbd{background:#22303f;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 7px;font-size:12.5px;font-family:inherit}
+  .btnname{background:#0d2336;border:1px solid #2f6fed;color:#bfe0ff;border-radius:6px;padding:1px 8px;font-size:13px;font-weight:600;white-space:nowrap}
+  .foot{color:var(--dim);font-size:13px;margin-top:50px;border-top:1px solid var(--line);padding-top:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="cover">
+  <div class="badge">IPEM-Tomo · napari plugin user guide</div>
+  <h1>Using the Cryo3D Editor</h1>
+  <div class="sub">A hands-on guide to cleaning, colouring, rendering and exporting cryo-ET segmentations with the Cryo3D Editor plugin for napari — one tab at a time.</div>
+  <div class="objbox">
+    <h3>What you will learn</h3>
+    <ul>
+      <li>Open the plugin and load a tomogram and its segmentation.</li>
+      <li>Use <span class="tabchip c-dust">🧹 Dust</span> to remove small objects and thin structures.</li>
+      <li>Use <span class="tabchip c-erase">✂️ Erase</span> to paint out unwanted regions.</li>
+      <li>Use <span class="tabchip c-color">🎨 Colors</span> to recolour, merge and delete labels.</li>
+      <li>Use <span class="tabchip c-render">💡 Render</span> to adjust the view and export images / MRC files.</li>
+      <li>Use <span class="tabchip c-movie">🎬 Movie</span> to make keyframe animations and 360° spin movies.</li>
+    </ul>
+  </div>
+</div>
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#start">Getting started — open the plugin &amp; load data</a></li>
+    <li><a href="#workspace">Understanding the workspace</a></li>
+    <li><a href="#dust">Dust tab — remove small objects &amp; erode</a></li>
+    <li><a href="#erase">Erase tab — paint out regions</a></li>
+    <li><a href="#colors">Colors tab — recolour, merge, delete labels</a></li>
+    <li><a href="#render">Render tab — view &amp; export (incl. Save as MRC)</a></li>
+    <li><a href="#movie">Movie tab — animations &amp; spin movies</a></li>
+    <li><a href="#workflow">A typical end-to-end workflow</a></li>
+    <li><a href="#tips">Tips &amp; troubleshooting</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<h2 id="start">1 · Getting started</h2>
+
+<h3>Open the plugin</h3>
+<p>Launch napari, then open the plugin in one of two ways:</p>
+<ul>
+  <li><strong>Installed plugin:</strong> menu <strong>Plugins → Cryo3D Editor</strong>. The panel docks on the right.</li>
+  <li><strong>Standalone:</strong> run <code>python cryo3d_editor.py</code> in a terminal — napari opens with the panel already attached.</li>
+</ul>
+
+<h3>Load your data</h3>
+<p>The plugin works on two kinds of napari layers:</p>
+<table>
+  <tr><th>Layer type</th><th>What it is</th><th>How to load</th></tr>
+  <tr><td><strong>Image</strong> (tomogram)</td><td>The greyscale volume (<code>.mrc</code>/<code>.rec</code>)</td><td>Drag the file into napari, or <strong>File → Open</strong></td></tr>
+  <tr><td><strong>Labels</strong> (segmentation)</td><td>The integer mask where each object/structure has a number</td><td>Drag the segmentation file in, or use <span class="btnname">📂 Load Segmentation…</span> in the Dust tab</td></tr>
+</table>
+
+<figure>
+  <img src="images/screen_2s.png" alt="napari with a cryo-ET tomogram loaded">
+  <figcaption>Figure 1 — A cryo-ET tomogram (TS5) loaded in napari. The layer list (bottom-left) shows the tomogram and its segmentation layers; the central canvas shows one Z-slice of the volume.</figcaption>
+</figure>
+
+<div class="call key">
+  <div class="t">🔵 Key concept — Image vs Labels</div>
+  <p>An <strong>Image</strong> layer is the raw density (what the microscope recorded). A <strong>Labels</strong> layer is the <em>interpretation</em>: a volume of integers where 0 = background and 1, 2, 3… are different objects. Most cleanup tools (Dust, Erase, Colors) act on <strong>Labels</strong>; Render works on both.</p>
+</div>
+
+<div class="call out">
+  <div class="t">🟢 Output — voxel size is read automatically</div>
+  <p>When you load an <code>.mrc</code> file, the plugin reads the <strong>voxel size</strong> from its header and shows it (e.g. <code>1.3556 nm/vox</code>). This value is reused for measurements and is written back when you Save as MRC, so distances and volumes stay correct.</p>
+</div>
+
+<!-- 2 -->
+<h2 id="workspace">2 · Understanding the workspace</h2>
+<p>The plugin panel has five tabs across the top. Each tab is organised into numbered sections (<code>1 ▸ …</code>, <code>2 ▸ …</code>) that you generally work through top to bottom. Almost every tab starts with a <strong>layer selector</strong> and a refresh button <span class="btnname">↻</span> — always pick the layer you want to work on first.</p>
+
+<figure>
+<svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Plugin tabs overview">
+  <rect width="760" height="250" fill="#ffffff"/>
+  <style>
+    .tt{font:700 14px -apple-system,Arial;fill:#15263a}
+    .ds{font:12px -apple-system,Arial;fill:#4a5b6e}
+  </style>
+  <rect x="20" y="20" width="140" height="210" rx="10" fill="#fbf6e9" stroke="#e0a32e"/>
+  <text x="40" y="46" class="tt">🧹 Dust</text>
+  <text x="34" y="70" class="ds">Remove small</text>
+  <text x="34" y="88" class="ds">objects; erode</text>
+  <text x="34" y="106" class="ds">thickness</text>
+
+  <rect x="170" y="20" width="140" height="210" rx="10" fill="#37231f22" stroke="#e0533d"/>
+  <text x="190" y="46" class="tt">✂️ Erase</text>
+  <text x="184" y="70" class="ds">Paint a mask</text>
+  <text x="184" y="88" class="ds">to delete</text>
+  <text x="184" y="106" class="ds">regions</text>
+
+  <rect x="320" y="20" width="140" height="210" rx="10" fill="#2a1f3c22" stroke="#7c5cff"/>
+  <text x="340" y="46" class="tt">🎨 Colors</text>
+  <text x="334" y="70" class="ds">Recolour,</text>
+  <text x="334" y="88" class="ds">merge, delete</text>
+  <text x="334" y="106" class="ds">labels</text>
+
+  <rect x="470" y="20" width="140" height="210" rx="10" fill="#11304a22" stroke="#2f6fed"/>
+  <text x="490" y="46" class="tt">💡 Render</text>
+  <text x="484" y="70" class="ds">Contrast, 3D</text>
+  <text x="484" y="88" class="ds">mode; export</text>
+  <text x="484" y="106" class="ds">TIFF / MRC</text>
+
+  <rect x="620" y="20" width="120" height="210" rx="10" fill="#11332a22" stroke="#2bb673"/>
+  <text x="640" y="46" class="tt">🎬 Movie</text>
+  <text x="634" y="70" class="ds">Keyframe &amp;</text>
+  <text x="634" y="88" class="ds">spin movies</text>
+
+  <text x="34" y="150" class="ds" font-weight="700">Order of a typical session:</text>
+  <text x="34" y="172" class="ds">clean (Dust/Erase) → tidy labels (Colors) →</text>
+  <text x="34" y="190" class="ds">make it look good (Render) → export image/MRC →</text>
+  <text x="34" y="208" class="ds">optional: animate (Movie)</text>
+</svg>
+<figcaption>Figure 2 — The five tabs and the natural order to use them. You can jump between tabs freely; this is just the most common path.</figcaption>
+</figure>
+
+<figure>
+  <img src="images/plugin_demo.gif" alt="Animated demo of navigating the segmentation in napari">
+  <figcaption>Figure 3 — Live demo: scrolling through Z and inspecting the segmentation in napari. The left panel here is napari's native layer controls (paint brush, eraser, opacity); the Cryo3D Editor tabs dock alongside it.</figcaption>
+</figure>
+
+<!-- 3 DUST -->
+<h2 id="dust">3 · <span class="tabchip c-dust">🧹 Dust</span> — remove small objects &amp; erode</h2>
+<p><strong>Why:</strong> automatic segmentations are noisy — they contain tiny specks ("dust") and structures that are too thick. This tab cleans both.</p>
+
+<h3>Workflow</h3>
+<ol>
+  <li><strong>1 ▸ Load &amp; Select.</strong> Click <span class="btnname">📂 Load Segmentation…</span> (or pick an existing Labels layer in the dropdown). Use <span class="btnname">↻</span> if your layer is not listed.</li>
+  <li><strong>2 ▸ Performance.</strong> Tick <strong>Use GPU</strong> only if you have an NVIDIA GPU; otherwise leave it off (it falls back to CPU automatically).</li>
+  <li><strong>3 ▸ Erode Thickness.</strong> Set the erosion percentage to shrink every object by that fraction of its size. Tick <strong>Remove if &lt;</strong> to delete objects that disappear. Click <span class="btnname">👁 Preview</span> to see the effect, then <span class="btnname">✓ Apply</span> to commit.</li>
+  <li><strong>4 ▸ Hide Dust.</strong> Choose a <strong>metric</strong> (volume, area, size, or their "rank" versions), set the threshold, then <span class="btnname">📊 Analyze</span> to measure all objects, <span class="btnname">👁 Preview</span> to highlight what will be hidden, and <span class="btnname">✓ Apply</span> to remove them.</li>
+</ol>
+
+<table>
+  <tr><th>Control</th><th>What it does</th><th>Typical value</th></tr>
+  <tr><td>Use GPU</td><td>Routes erosion/labeling to CuPy if available</td><td>Off (on macOS)</td></tr>
+  <tr><td>Erode percentage</td><td>Shrinks each object by this % of its thickness</td><td>10–30 %</td></tr>
+  <tr><td>Remove if &lt;</td><td>Deletes objects that vanish after erosion</td><td>On for cleanup</td></tr>
+  <tr><td>Metric</td><td>How "small" is measured: <code>volume</code>, <code>area</code>, <code>size</code>, or top-N <code>rank</code></td><td>volume</td></tr>
+  <tr><td>+min vol</td><td>Adds a minimum-volume condition</td><td>optional</td></tr>
+  <tr><td>Connectivity</td><td>Which voxels count as "touching": 6, 18 or 26 neighbours</td><td>6 or 26</td></tr>
+  <tr><td>Fill holes &lt;</td><td>Closes small holes inside objects</td><td>optional</td></tr>
+</table>
+
+<div class="call imp">
+  <div class="t">🟡 Important — always Preview before Apply</div>
+  <p><span class="btnname">👁 Preview</span> shows the result without changing your data. Only <span class="btnname">✓ Apply</span> modifies the layer. If you don't like an applied result, use <span class="btnname">↶ Undo</span> in the STATUS section.</p>
+</div>
+
+<div class="call key">
+  <div class="t">🔵 Key concept — "rank" metrics</div>
+  <p>A plain metric like <code>volume</code> hides everything below a size threshold. A <code>volume rank</code> metric instead keeps only the <strong>top N largest</strong> objects — useful when you know how many real structures there should be (e.g. "keep the 5 biggest mitochondria").</p>
+</div>
+
+<!-- 4 ERASE -->
+<h2 id="erase">4 · <span class="tabchip c-erase">✂️ Erase</span> — paint out regions</h2>
+<p><strong>Why:</strong> some errors are not about size — they are in the wrong place. The Erase tab lets you paint a mask by hand and delete whatever it covers.</p>
+<ol>
+  <li><strong>1 ▸ Select Layer.</strong> Choose the Labels layer to edit.</li>
+  <li><strong>2 ▸ Paint Mask.</strong> Click <span class="btnname">🖌 Create Mask</span>. A red "Erase_Mask" layer appears in paint mode — drag on the canvas to paint over the regions you want to remove. <span class="btnname">🗑 Clear Mask</span> wipes the mask to start over.</li>
+  <li><strong>3 ▸ Z Range.</strong> Tick <strong>All Z slices</strong> to erase through the whole volume, or set a start/end slice to limit it to a depth range.</li>
+  <li><strong>4 ▸ Actions.</strong> Click <span class="btnname">✂️ Apply Erase</span> to delete the painted voxels from the segmentation. <span class="btnname">↶ Undo</span> reverts it.</li>
+</ol>
+<div class="call note">
+  <div class="t">🟣 Note — adjust the brush</div>
+  <p>While the red mask layer is active you can change the <strong>brush size</strong> with napari's normal controls (the brush slider, or <kbd>[</kbd> / <kbd>]</kbd>). Paint on one slice at a time and scroll through Z to cover a 3D region.</p>
+</div>
+
+<!-- 5 COLORS -->
+<h2 id="colors">5 · <span class="tabchip c-color">🎨 Colors</span> — recolour, merge &amp; delete labels</h2>
+<p><strong>Why:</strong> to interpret a segmentation you need to tell structures apart and tidy up over-segmentation. This tab manages individual label values.</p>
+<ol>
+  <li><strong>Layer.</strong> Pick the Labels layer.</li>
+  <li><strong>Labels list.</strong> Click a label to select it; hold <kbd>Ctrl</kbd> and click to select several at once.</li>
+  <li><strong>Color &amp; Opacity.</strong> Click <span class="btnname">🎨 Pick Color</span> (or a preset swatch) to recolour the selected label(s), and use the opacity slider to fade them.</li>
+  <li><strong>Actions.</strong>
+    <ul>
+      <li><span class="btnname">🎯 Go to</span> — jump the view to the selected label.</li>
+      <li><span class="btnname">🗑 Erase Label</span> — delete the selected label(s) entirely.</li>
+      <li><span class="btnname">🔗 Merge</span> — combine several selected labels into one.</li>
+      <li><span class="btnname">🔄 Reset Colors</span> — restore the default random colour scheme.</li>
+    </ul>
+  </li>
+</ol>
+<div class="call key">
+  <div class="t">🔵 Key concept — merging fixes over-segmentation</div>
+  <p>Automatic methods often split one real object into several labels. Select those pieces with <kbd>Ctrl</kbd>+click and press <span class="btnname">🔗 Merge</span> so they become a single object — important before measuring or exporting.</p>
+</div>
+
+<!-- 6 RENDER -->
+<h2 id="render">6 · <span class="tabchip c-render">💡 Render</span> — view &amp; export</h2>
+<p><strong>Why:</strong> the same data can look flat or striking depending on contrast, lighting and rendering mode. This tab also exports your results as images or MRC files.</p>
+<ol>
+  <li><strong>1 ▸ Select Layer</strong> (Image or Labels).</li>
+  <li><strong>2 ▸ Contrast / Opacity &amp; Gamma.</strong> Adjust gamma and contrast sliders; <span class="btnname">⚡ Auto Contrast</span> picks good limits automatically. For Labels, the sliders control opacity.</li>
+  <li><strong>3 ▸ Rendering Mode (3D).</strong> Choose how the volume is projected in 3D: <code>mip</code>, <code>translucent</code>, <code>attenuated_mip</code>, <code>iso</code>, <code>average</code>, <code>minip</code>. Set the ISO threshold/attenuation when relevant.</li>
+  <li><strong>4 ▸ Colormap.</strong> Pick a colour scheme for Image layers.</li>
+  <li><strong>5 ▸ Membrane Presets.</strong> One-click looks: <span class="btnname">🧬 Membrane Preset</span>, <span class="btnname">🌫 Dense Volume Preset</span>, <span class="btnname">🔵 ISO Surface Preset</span>, or <span class="btnname">🔄 Reset to Default</span>.</li>
+  <li><strong>6 ▸ Save Snapshot as TIFF.</strong> Tick <strong>Canvas only</strong> for just the image area, then <span class="btnname">📸 Save Snapshot…</span>.</li>
+  <li><strong>7 ▸ Save as MRC.</strong> Export the selected layer to a new <code>.mrc</code>. Tick <strong>Binary mask</strong> to save Labels as 0/1, then <span class="btnname">💾 Save as MRC…</span>.</li>
+</ol>
+
+<table>
+  <tr><th>Rendering mode</th><th>Best for</th></tr>
+  <tr><td><code>mip</code> (max intensity)</td><td>Bright structures on dark background — the default workhorse</td></tr>
+  <tr><td><code>attenuated_mip</code></td><td>Dense/crowded volumes where plain MIP looks cluttered</td></tr>
+  <tr><td><code>iso</code></td><td>Clean surface view of a thresholded object</td></tr>
+  <tr><td><code>translucent</code> / <code>average</code> / <code>minip</code></td><td>Specialised looks (semi-transparent, mean, minimum)</td></tr>
+</table>
+
+<div class="call out">
+  <div class="t">🟢 Output — Save as MRC keeps the voxel size</div>
+  <p>The exported <code>.mrc</code> writes the voxel size into its header (nm → Å), and chooses the right data type automatically: <code>int16</code> for label masks, <code>int8</code> for binary masks, <code>float32</code> for tomograms. The file opens correctly in IMOD, ChimeraX and napari.</p>
+</div>
+
+<!-- 7 MOVIE -->
+<h2 id="movie">7 · <span class="tabchip c-movie">🎬 Movie</span> — animations &amp; spin movies</h2>
+<p><strong>Why:</strong> 3D structures are far clearer in motion. This tab has two sub-tabs.</p>
+
+<h3>Keyframe Movie</h3>
+<ol>
+  <li><strong>1 ▸ Capture Keyframes.</strong> Position the 3D view the way you want, then click <span class="btnname">📸 Capture Current State</span>. Repeat for each viewpoint — each capture becomes a keyframe.</li>
+  <li><strong>2 ▸ Keyframes.</strong> Reorder with <span class="btnname">↑</span>/<span class="btnname">↓</span>, replace one with <span class="btnname">🔄 Update Selected</span>, or <span class="btnname">🗑 Clear All</span>.</li>
+  <li><strong>3 ▸ Settings.</strong> Choose format (<code>MP4</code>, <code>GIF</code>, <code>PNG Sequence</code>), interpolation (<code>Smoothstep</code>, <code>Linear</code>, <code>Ease-in</code>, <code>Ease-out</code>) and frames per second.</li>
+  <li><strong>4 ▸ Preview &amp; Export.</strong> <span class="btnname">▶ Preview</span> to check, then <span class="btnname">💾 Export Movie…</span>.</li>
+</ol>
+
+<h3>Spin Movie</h3>
+<ol>
+  <li><strong>1 ▸ Rotation Settings.</strong> Pick the axis (<code>Y horizontal</code>, <code>X vertical</code>, <code>Z depth</code>) and the output format.</li>
+  <li><strong>2 ▸ Export.</strong> Click <span class="btnname">🌀 Start Spin Movie…</span> for an automatic 360° rotation (ChimeraX-style). <span class="btnname">✕ Cancel</span> stops it.</li>
+</ol>
+<div class="call note">
+  <div class="t">🟣 Note — set up the look first</div>
+  <p>Make the scene look good in the Render tab (contrast, colours, 3D mode) <em>before</em> capturing keyframes or spinning — the movie records exactly what is on the canvas.</p>
+</div>
+
+<!-- 8 WORKFLOW -->
+<h2 id="workflow">8 · A typical end-to-end workflow</h2>
+<figure>
+<svg viewBox="0 0 760 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="End-to-end workflow">
+  <rect width="760" height="150" fill="#ffffff"/>
+  <style>
+    .b{rx:9;stroke-width:1.5} .tx{font:600 12.5px -apple-system,Arial;fill:#15263a}
+    .ar{stroke:#7790a8;stroke-width:2;fill:none;marker-end:url(#a)}
+  </style>
+  <defs><marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+    <path d="M0,0 L9,4.5 L0,9 z" fill="#7790a8"/></marker></defs>
+  <rect x="14" y="50" width="118" height="50" rx="9" fill="#e8f0fb" stroke="#2f6fed"/>
+  <text x="34" y="80" class="tx">Load data</text>
+  <rect x="158" y="50" width="118" height="50" rx="9" fill="#fbf6e9" stroke="#e0a32e"/>
+  <text x="176" y="73" class="tx">Clean</text>
+  <text x="176" y="91" class="tx" font-weight="400">Dust + Erase</text>
+  <rect x="302" y="50" width="118" height="50" rx="9" fill="#f3eefe" stroke="#7c5cff"/>
+  <text x="320" y="73" class="tx">Tidy labels</text>
+  <text x="320" y="91" class="tx" font-weight="400">Colors</text>
+  <rect x="446" y="50" width="118" height="50" rx="9" fill="#11304a18" stroke="#2f6fed"/>
+  <text x="464" y="73" class="tx">Style view</text>
+  <text x="464" y="91" class="tx" font-weight="400">Render</text>
+  <rect x="590" y="50" width="156" height="50" rx="9" fill="#eef6f1" stroke="#2bb673"/>
+  <text x="608" y="73" class="tx">Export</text>
+  <text x="608" y="91" class="tx" font-weight="400">MRC / TIFF / Movie</text>
+  <line x1="132" y1="75" x2="158" y2="75" class="ar"/>
+  <line x1="276" y1="75" x2="302" y2="75" class="ar"/>
+  <line x1="420" y1="75" x2="446" y2="75" class="ar"/>
+  <line x1="564" y1="75" x2="590" y2="75" class="ar"/>
+</svg>
+<figcaption>Figure 4 — The usual order: load → clean → tidy labels → style → export. Use Undo freely at any stage.</figcaption>
+</figure>
+
+<!-- 9 TIPS -->
+<h2 id="tips">9 · Tips &amp; troubleshooting</h2>
+<table>
+  <tr><th>Situation</th><th>What to do</th></tr>
+  <tr><td>My layer isn't in the dropdown</td><td>Click the <span class="btnname">↻</span> refresh button next to the layer selector</td></tr>
+  <tr><td>An operation says "Select layer"</td><td>Pick a layer in the tab's selector first — each tab acts on the chosen layer</td></tr>
+  <tr><td>I applied something by mistake</td><td>Use <span class="btnname">↶ Undo</span> (Dust and Erase tabs keep a history)</td></tr>
+  <tr><td>Preview looks right but nothing changed</td><td>Preview never edits data — click <span class="btnname">✓ Apply</span> to commit</td></tr>
+  <tr><td>3D view is slow or hangs on large volumes</td><td>Switch to 2D, reduce canvas size, or work on a cropped region</td></tr>
+  <tr><td>Colours look wrong after editing (napari 0.7)</td><td>Press <span class="btnname">🔄 Reset Colors</span>; make sure you're on the latest plugin version</td></tr>
+  <tr><td>Exported MRC opens with wrong scale</td><td>Check the voxel size shown after loading; it is written into the MRC header on export</td></tr>
+</table>
+
+<div class="foot">
+  <p><strong>Plugin:</strong> Cryo3D Editor v3.0 — tabs: Dust · Erase · Colors · Render · Movie &nbsp;·&nbsp; <strong>Repo:</strong> <a href="https://github.com/lifeviewspace/cryo3d-editor">github.com/lifeviewspace/cryo3d-editor</a></p>
+  <p><strong>napari basics:</strong> <a href="https://napari.org/stable/tutorials/index.html">napari.org/stable/tutorials</a> &nbsp;·&nbsp; Author: Kennedy Bonjour (lifeviewspace).</p>
+</div>
+
+</div>
+</body>
+</html>

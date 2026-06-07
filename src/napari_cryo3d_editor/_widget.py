@@ -2901,7 +2901,7 @@ class AnimationTab(QWidget):
 class Cryo3DEditorWidget(QWidget):
     """Root widget — hosts the tab bar and all sub-tabs."""
 
-    def __init__(self, viewer: "napari.Viewer"):
+    def __init__(self, viewer: napari.Viewer):
         super().__init__()
         # Safe to call here: env mitigations use setdefault and the
         # hardware summary prints only once per process.

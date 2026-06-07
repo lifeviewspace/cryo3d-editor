@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Publishing a napari Plugin on GitHub — Cryo3D Editor Tutorial</title>
+<style>
+  :root{
+    --bg:#0f1620; --panel:#16202c; --panel2:#1b2735; --ink:#e8eef5;
+    --dim:#9fb0c3; --line:#2a3a4d; --accent:#4ea1ff; --accent2:#7c5cff;
+    --blue:#2f6fed; --purple:#7c5cff; --green:#2bb673; --amber:#e0a32e; --red:#e0533d;
+    --code-bg:#0b1118; --code-ink:#bfe3ff;
+    --maxw:880px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.65;font-size:16px}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:32px 22px 80px}
+  h1,h2,h3{line-height:1.25;font-weight:700}
+  h1{font-size:30px;margin:0 0 6px}
+  h2{font-size:23px;margin:46px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+  h3{font-size:18px;margin:28px 0 10px;color:#cfe1f5}
+  p{margin:12px 0}
+  a{color:var(--accent)}
+  code{font-family:"SF Mono",Menlo,Consolas,"Courier New",monospace;
+    background:#10202e;color:var(--code-ink);padding:2px 6px;border-radius:5px;font-size:13.5px}
+  pre{background:var(--code-bg);border:1px solid var(--line);border-left:4px solid var(--accent);
+    border-radius:10px;padding:16px 18px;overflow:auto;margin:14px 0}
+  pre code{background:none;color:#cfeaff;padding:0;font-size:13.5px;line-height:1.7}
+  .cmt{color:#5f7693}
+  /* cover */
+  .cover{background:linear-gradient(135deg,#16202c,#11304a);border:1px solid var(--line);
+    border-radius:16px;padding:30px 28px;margin-bottom:8px}
+  .badge{display:inline-block;background:#11304a;border:1px solid var(--accent);
+    color:var(--accent);font-size:12px;font-weight:600;padding:3px 11px;border-radius:20px;margin-bottom:14px}
+  .sub{color:var(--dim);font-size:15px;margin-top:4px}
+  .objbox{background:var(--panel2);border-radius:12px;padding:16px 20px;margin-top:20px}
+  .objbox h3{margin-top:0;color:var(--accent)}
+  .objbox ul{margin:8px 0 0;padding-left:20px}
+  .objbox li{margin:6px 0}
+  /* TOC */
+  nav.toc{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:16px 22px;margin:24px 0}
+  nav.toc strong{color:var(--accent);font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  nav.toc ol{margin:10px 0 0;padding-left:22px}
+  nav.toc li{margin:5px 0}
+  nav.toc a{text-decoration:none}
+  /* callouts */
+  .call{border-radius:10px;padding:13px 16px 13px 16px;margin:16px 0;border-left:5px solid;
+    background:var(--panel)}
+  .call .t{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:4px;text-transform:uppercase}
+  .call p{margin:4px 0}
+  .key{border-color:var(--blue)} .key .t{color:#6fa8ff}
+  .imp{border-color:var(--amber)} .imp .t{color:var(--amber)}
+  .out{border-color:var(--green)} .out .t{color:#46d394}
+  .warn{border-color:var(--red)} .warn .t{color:#ff7a63}
+  .note{border-color:var(--purple)} .note .t{color:#a48bff}
+  /* tables */
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;
+    background:var(--panel);border-radius:10px;overflow:hidden}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#10283c;color:#bfe0ff;font-size:12.5px;text-transform:uppercase;letter-spacing:.03em}
+  tr:last-child td{border-bottom:none}
+  tr:nth-child(even) td{background:#13202d}
+  /* figure */
+  figure{margin:22px 0;text-align:center}
+  figure svg{max-width:100%;height:auto;background:#fff;border-radius:12px;border:1px solid var(--line)}
+  figcaption{color:var(--dim);font-size:13.5px;font-style:italic;margin-top:8px}
+  .step{counter-reset:none}
+  .pill{display:inline-block;background:#11304a;color:#bfe0ff;border-radius:6px;padding:1px 8px;font-size:12.5px;font-weight:600}
+  hr{border:none;border-top:1px solid var(--line);margin:40px 0}
+  .foot{color:var(--dim);font-size:13px;margin-top:50px;border-top:1px solid var(--line);padding-top:18px}
+  kbd{background:#22303f;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;
+    padding:1px 7px;font-size:12.5px;font-family:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ===================== COVER ===================== -->
+<div class="cover">
+  <div class="badge">IPEM-Tomo · napari plugin development</div>
+  <h1>Publishing a napari Plugin on GitHub</h1>
+  <div class="sub">A complete, beginner-friendly walkthrough using the <strong>Cryo3D Editor</strong> plugin as the running example — from understanding what the plugin is, to installing it, to publishing and updating it on GitHub.</div>
+
+  <div class="objbox">
+    <h3>Learning objectives</h3>
+    <p style="margin:0 0 6px;color:var(--dim)">By the end of this tutorial, you will be able to:</p>
+    <ul>
+      <li>Explain what a <strong>napari plugin</strong> is and what the Cryo3D Editor does.</li>
+      <li>Read and understand the <strong>file structure</strong> of an installable Python plugin (the npe2 layout).</li>
+      <li><strong>Install</strong> the plugin on your own machine or on the cluster.</li>
+      <li><strong>Publish</strong> the plugin to GitHub using both GitHub Desktop and the terminal.</li>
+      <li><strong>Update</strong> the plugin and push new changes safely.</li>
+      <li>Diagnose the most common errors (lock file, authentication, "no matching distribution").</li>
+    </ul>
+  </div>
+</div>
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#p1">What is the plugin? (the big picture)</a></li>
+    <li><a href="#p2">How the plugin is built (package structure)</a></li>
+    <li><a href="#p3">Installing the plugin</a></li>
+    <li><a href="#p4">Publishing to GitHub — step by step</a></li>
+    <li><a href="#p5">Updating the plugin (everyday workflow)</a></li>
+    <li><a href="#p6">Troubleshooting</a></li>
+    <li><a href="#p7">Command summary &amp; glossary</a></li>
+  </ol>
+</nav>
+
+<!-- ===================== PART 1 ===================== -->
+<h2 id="p1">1 · What is the plugin? (the big picture)</h2>
+
+<h3>Why this exists</h3>
+<p><strong>napari</strong> is a free, open-source image viewer for scientific data, especially 2D/3D/n-D microscopy and cryo-electron tomography (cryo-ET). On its own, napari shows your data and lets you draw labels — but it does not know anything about <em>your specific</em> analysis workflow. A <strong>plugin</strong> is a small piece of software that "plugs into" napari and adds new buttons, panels, and operations tailored to a task.</p>
+
+<p>The <strong>Cryo3D Editor</strong> is such a plugin. It adds a dockable panel to napari with five tabs, each solving one cryo-ET cleanup/visualization problem:</p>
+
+<table>
+  <tr><th>Tab</th><th>What it does</th><th>Typical use</th></tr>
+  <tr><td>🧹 <strong>Dust</strong></td><td>Hides or removes small objects, and shrinks objects (per-object erosion)</td><td>Cleaning noisy segmentations</td></tr>
+  <tr><td>✂️ <strong>Erase</strong></td><td>A 2D paint-mask eraser for Labels layers</td><td>Manually deleting wrong regions</td></tr>
+  <tr><td>🎨 <strong>Colors</strong></td><td>Per-label colour, opacity, merging, presets</td><td>Making structures readable</td></tr>
+  <tr><td>💡 <strong>Render</strong></td><td>Lighting, contrast, membrane enhancement, snapshot, <strong>Save as MRC</strong></td><td>Publication-quality views &amp; export</td></tr>
+  <tr><td>🎬 <strong>Movie</strong></td><td>Keyframe 3D animation + 360° spin movie</td><td>Talks, papers, outreach</td></tr>
+</table>
+
+<div class="call key">
+  <div class="t">🔵 Key concept — two ways to run the same code</div>
+  <p>The exact same Python file can be used in <strong>two modes</strong>:</p>
+  <p><strong>(a) Standalone</strong> — you run <code>python cryo3d_editor.py</code> and it opens napari with the panel already attached. Great for quick testing.</p>
+  <p><strong>(b) Installed plugin</strong> — you <code>pip install</code> it once, and afterwards it appears inside any napari session under <strong>Plugins → Cryo3D Editor</strong>. This is what your colleagues and students will use.</p>
+</div>
+
+<h3>What "publishing on GitHub" means</h3>
+<p><strong>Git</strong> is a version-control system: it records the history of your files so you can go back in time, see what changed, and collaborate. <strong>GitHub</strong> is a website that <em>hosts</em> git repositories online, so others can download, install, and contribute to your code. Publishing = uploading your local project to GitHub so it has a public web address (a URL).</p>
+
+<div class="call note">
+  <div class="t">🟣 Note — GitHub is not the same as PyPI</div>
+  <p>GitHub <em>hosts the source code</em>. <strong>PyPI</strong> (the Python Package Index) is a separate service that powers <code>pip install &lt;name&gt;</code> by short name. Until you publish to PyPI, <code>pip install napari-cryo3d-editor</code> will fail — you install from GitHub or from your local copy instead. This is covered in <a href="#p3">Part 3</a>.</p>
+</div>
+
+<!-- ===================== PART 2 ===================== -->
+<h2 id="p2">2 · How the plugin is built (package structure)</h2>
+
+<p>To be installable, a single script is not enough — Python needs a small set of "metadata" files that describe the package: its name, version, dependencies, and how napari should find the widget. The modern napari standard for this is called <strong>npe2</strong> (napari plugin engine 2). Here is the full layout of the Cryo3D Editor:</p>
+
+<figure>
+<svg viewBox="0 0 760 430" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Package structure diagram">
+  <rect width="760" height="430" fill="#ffffff"/>
+  <style>
+    .lbl{font:600 14px -apple-system,Arial;fill:#1b2735}
+    .desc{font:12px -apple-system,Arial;fill:#4a5b6e}
+    .root{font:700 15px -apple-system,Arial;fill:#13304a}
+    .mono{font:13px Menlo,monospace;fill:#13304a}
+  </style>
+  <!-- root -->
+  <rect x="20" y="20" width="720" height="40" rx="8" fill="#e8f0fb" stroke="#2f6fed"/>
+  <text x="38" y="45" class="root">📁 cryo3d-editor/  <tspan class="desc">— the repository (what lives on GitHub)</tspan></text>
+
+  <!-- config files -->
+  <rect x="50" y="74" width="690" height="34" rx="7" fill="#f3eefe" stroke="#7c5cff"/>
+  <text x="66" y="96" class="mono">pyproject.toml <tspan class="desc" dx="6">— name, version, dependencies, npe2 entry point (the "ID card")</tspan></text>
+
+  <rect x="50" y="114" width="690" height="34" rx="7" fill="#f3eefe" stroke="#7c5cff"/>
+  <text x="66" y="136" class="mono">requirements.txt <tspan class="desc" dx="6">— plain list of libraries needed to run it</tspan></text>
+
+  <rect x="50" y="154" width="690" height="34" rx="7" fill="#fbf6e9" stroke="#e0a32e"/>
+  <text x="66" y="176" class="mono">README.md <tspan class="desc" dx="6">— front page shown on GitHub: what it is, how to install</tspan></text>
+
+  <rect x="50" y="194" width="690" height="34" rx="7" fill="#fbf6e9" stroke="#e0a32e"/>
+  <text x="66" y="216" class="mono">LICENSE <tspan class="desc" dx="6">— legal terms (BSD-3-Clause) allowing others to use it</tspan></text>
+
+  <rect x="50" y="234" width="690" height="34" rx="7" fill="#eef6f1" stroke="#2bb673"/>
+  <text x="66" y="256" class="mono">.gitignore <tspan class="desc" dx="6">— files git should NOT upload (caches, data, temp)</tspan></text>
+
+  <!-- src -->
+  <rect x="50" y="278" width="690" height="34" rx="7" fill="#e8f0fb" stroke="#2f6fed"/>
+  <text x="66" y="300" class="mono">📁 src/napari_cryo3d_editor/ <tspan class="desc" dx="6">— the actual Python package</tspan></text>
+
+  <rect x="80" y="318" width="660" height="32" rx="7" fill="#fff" stroke="#9fb0c3"/>
+  <text x="96" y="339" class="mono">__init__.py <tspan class="desc" dx="6">— marks the folder as a package; sets version</tspan></text>
+
+  <rect x="80" y="356" width="660" height="32" rx="7" fill="#fff" stroke="#9fb0c3"/>
+  <text x="96" y="377" class="mono">napari.yaml <tspan class="desc" dx="6">— the npe2 manifest: tells napari which widget to show</tspan></text>
+
+  <rect x="80" y="394" width="660" height="32" rx="7" fill="#fff" stroke="#9fb0c3"/>
+  <text x="96" y="415" class="mono">_widget.py <tspan class="desc" dx="6">— ALL the plugin code (the 5 tabs live here)</tspan></text>
+</svg>
+<figcaption>Figure 1 — Anatomy of the plugin. Blue = structure, purple = packaging metadata, amber = documentation/legal, green = git config. Notice that all the real logic is in a single file, <code>_widget.py</code>; everything else exists so Python and napari can find and install it.</figcaption>
+</figure>
+
+<h3>The three files that make it a plugin (not just a script)</h3>
+
+<table>
+  <tr><th>File</th><th>What it declares</th><th>Why it matters</th></tr>
+  <tr><td><code>pyproject.toml</code></td><td>Package name, version, dependencies, and the line <code>[project.entry-points."napari.manifest"]</code></td><td>This is what <code>pip</code> reads to install the package and what tells napari "this project is a plugin".</td></tr>
+  <tr><td><code>napari.yaml</code></td><td>A <em>command</em> pointing at <code>_widget:Cryo3DEditorWidget</code> and a <em>widget</em> contribution</td><td>This is how the panel appears in the <strong>Plugins</strong> menu. The pointer must match a real class in the code.</td></tr>
+  <tr><td><code>__init__.py</code></td><td>Imports the widget class and sets <code>__version__</code></td><td>Makes the folder importable as <code>napari_cryo3d_editor</code>.</td></tr>
+</table>
+
+<div class="call imp">
+  <div class="t">🟡 Important — the manifest must point to real code</div>
+  <p>In <code>napari.yaml</code> the line <code>python_name: napari_cryo3d_editor._widget:Cryo3DEditorWidget</code> means: "in the file <code>_widget.py</code>, use the class <code>Cryo3DEditorWidget</code>." If you rename that class, you must update this line, or napari will raise an error when you open the plugin.</p>
+</div>
+
+<!-- ===================== PART 3 ===================== -->
+<h2 id="p3">3 · Installing the plugin</h2>
+
+<p>There are three ways to install, depending on whether the code is on your machine, on GitHub, or on PyPI. The first error many people hit is trying the PyPI way before the package is published there.</p>
+
+<table>
+  <tr><th>Method</th><th>Command</th><th>When to use</th></tr>
+  <tr><td><strong>A. Local (editable)</strong></td><td><code>pip install -e .</code></td><td>You have the folder on disk and are actively editing it. Changes take effect immediately — no reinstall.</td></tr>
+  <tr><td><strong>B. From GitHub</strong></td><td><code>pip install "git+https://github.com/lifeviewspace/cryo3d-editor.git"</code></td><td>On a fresh machine or the cluster, no manual clone needed.</td></tr>
+  <tr><td><strong>C. From PyPI</strong></td><td><code>pip install napari-cryo3d-editor</code></td><td>Only works <em>after</em> you publish to PyPI (not done yet).</td></tr>
+</table>
+
+<h3>Recommended: method A (editable install)</h3>
+<pre><code><span class="cmt"># 1. activate the environment that has napari</span>
+conda activate membrain-env
+
+<span class="cmt"># 2. go into the project folder</span>
+cd ~/Documents/GitHub/Cryo3d-editor
+
+<span class="cmt"># 3. install it in "editable" mode (the dot means "this folder")</span>
+pip install -e .
+
+<span class="cmt"># 4. launch napari — the plugin is now in the Plugins menu</span>
+napari</code></pre>
+
+<div class="call out">
+  <div class="t">🟢 Output — how to know it worked</div>
+  <p>After <code>pip install -e .</code> you should see <code>Successfully installed napari-cryo3d-editor-3.0.0</code>. Then in napari, open the menu <strong>Plugins</strong> → you should see <strong>Cryo3D Editor</strong>. Click it and the five-tab panel docks on the right.</p>
+</div>
+
+<div class="call warn">
+  <div class="t">🔴 Warning — "No matching distribution found"</div>
+  <p>If you run <code>pip install napari-cryo3d-editor</code> and get <code>ERROR: No matching distribution found</code>, that is <em>expected</em>: the package is not on PyPI. Use method A or B instead. This is not a bug in the plugin.</p>
+</div>
+
+<div class="call note">
+  <div class="t">🟣 Note — the [gpu] extra</div>
+  <p><code>pip install "napari-cryo3d-editor[gpu]"</code> adds optional NVIDIA GPU acceleration (CuPy). It does <strong>not</strong> work on Apple Silicon Macs and is never required — the plugin always falls back to CPU. Skip it on macOS.</p>
+</div>
+
+<!-- ===================== PART 4 ===================== -->
+<h2 id="p4">4 · Publishing to GitHub — step by step</h2>
+
+<p>Publishing has two halves: a <strong>local</strong> half (turn your folder into a git repository and record a snapshot) and a <strong>remote</strong> half (create the repository on GitHub and upload). Figure 2 shows the whole journey.</p>
+
+<figure>
+<svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Publishing flowchart">
+  <rect width="760" height="360" fill="#ffffff"/>
+  <style>
+    .box{fill:#e8f0fb;stroke:#2f6fed;stroke-width:1.5}
+    .boxp{fill:#f3eefe;stroke:#7c5cff;stroke-width:1.5}
+    .boxg{fill:#eef6f1;stroke:#2bb673;stroke-width:1.5}
+    .tt{font:600 13px -apple-system,Arial;fill:#15263a}
+    .ss{font:11.5px Menlo,monospace;fill:#3a4a5e}
+    .ar{stroke:#7790a8;stroke-width:2;fill:none;marker-end:url(#h)}
+    .ph{font:700 12px -apple-system,Arial;fill:#7790a8;letter-spacing:.05em}
+  </style>
+  <defs><marker id="h" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+    <path d="M0,0 L9,4.5 L0,9 z" fill="#7790a8"/></marker></defs>
+
+  <text x="40" y="28" class="ph">LOCAL (your computer)</text>
+  <rect x="40" y="40" width="200" height="58" rx="9" class="box"/>
+  <text x="56" y="63" class="tt">1 · git init</text>
+  <text x="56" y="82" class="ss">create the repository</text>
+
+  <rect x="40" y="128" width="200" height="58" rx="9" class="box"/>
+  <text x="56" y="151" class="tt">2 · git add + commit</text>
+  <text x="56" y="170" class="ss">save a snapshot</text>
+
+  <line x1="140" y1="98" x2="140" y2="128" class="ar"/>
+
+  <text x="300" y="28" class="ph">GITHUB (website)</text>
+  <rect x="300" y="40" width="200" height="58" rx="9" class="boxp"/>
+  <text x="316" y="63" class="tt">3 · Create empty repo</text>
+  <text x="316" y="82" class="ss">github.com/new</text>
+
+  <text x="560" y="28" class="ph">CONNECT &amp; UPLOAD</text>
+  <rect x="540" y="128" width="200" height="58" rx="9" class="boxp"/>
+  <text x="556" y="151" class="tt">4 · git remote add</text>
+  <text x="556" y="170" class="ss">link local ↔ GitHub</text>
+
+  <rect x="540" y="216" width="200" height="58" rx="9" class="boxg"/>
+  <text x="556" y="239" class="tt">5 · git push</text>
+  <text x="556" y="258" class="ss">upload your code</text>
+
+  <line x1="240" y1="157" x2="540" y2="157" class="ar"/>
+  <line x1="400" y1="98" x2="400" y2="157" class="ar" stroke-dasharray="4 4"/>
+  <line x1="640" y1="186" x2="640" y2="216" class="ar"/>
+
+  <rect x="300" y="216" width="200" height="58" rx="9" class="boxg"/>
+  <text x="316" y="239" class="tt">✓ Done — public URL</text>
+  <text x="316" y="258" class="ss">github.com/.../cryo3d-editor</text>
+  <line x1="540" y1="245" x2="500" y2="245" class="ar"/>
+</svg>
+<figcaption>Figure 2 — The publishing pipeline. Steps 1–2 happen on your computer, step 3 on the GitHub website, and steps 4–5 connect the two and upload. GitHub Desktop does steps 1, 2, 4, and 5 with buttons; the terminal does them with commands.</figcaption>
+</figure>
+
+<h3>Path 1 — Using GitHub Desktop (recommended for beginners)</h3>
+<p>GitHub Desktop is a free app that turns the git commands into buttons and handles login for you.</p>
+<ol class="step">
+  <li><strong>Add the project.</strong> Open GitHub Desktop → <kbd>File</kbd> → <kbd>Add Local Repository</kbd> → choose your <code>cryo3d-editor</code> folder. If it is not a repository yet, it offers to create one — accept.</li>
+  <li><strong>Review the changes.</strong> The left panel lists every changed file with a checkbox. Leave them all checked.</li>
+  <li><strong>Write a commit message.</strong> In the <em>Summary</em> box, type a short description, e.g. <code>Initial commit</code> or <code>Add Save as MRC export</code>.</li>
+  <li><strong>Commit.</strong> Click <kbd>Commit to main</kbd>. This records the snapshot locally.</li>
+  <li><strong>Publish.</strong> Click <kbd>Publish repository</kbd> at the top. Choose the name (<code>cryo3d-editor</code>), keep it Public, and confirm. GitHub Desktop creates the repo online and uploads everything in one step.</li>
+  <li><strong>Future changes.</strong> After editing code, the changes reappear in the left panel → commit again → click <kbd>Push origin</kbd>.</li>
+</ol>
+
+<div class="call imp">
+  <div class="t">🟡 Important — do NOT add README/license on GitHub if you already have them locally</div>
+  <p>When creating the repository (the website form or the Publish dialog), leave "Add README", "Add .gitignore", and "Add license" turned <strong>off</strong>. You already have these files locally; adding them again on GitHub creates a conflicting history that blocks your first push.</p>
+</div>
+
+<h3>Path 2 — Using the terminal (full control)</h3>
+<pre><code><span class="cmt"># --- LOCAL HALF ---</span>
+cd ~/Documents/GitHub/Cryo3d-editor
+git init                       <span class="cmt"># step 1: create the repository</span>
+git add -A                     <span class="cmt"># stage every file</span>
+git commit -m "Initial commit" <span class="cmt"># step 2: record the snapshot</span>
+git branch -M main             <span class="cmt"># name the main branch "main"</span>
+
+<span class="cmt"># --- create the empty repo on github.com/new first (step 3) ---</span>
+
+<span class="cmt"># --- REMOTE HALF ---</span>
+git remote add origin https://github.com/lifeviewspace/cryo3d-editor.git  <span class="cmt"># step 4</span>
+git push -u origin main        <span class="cmt"># step 5: upload</span></code></pre>
+
+<div class="call warn">
+  <div class="t">🔴 Warning — password login no longer works</div>
+  <p>If <code>git push</code> asks for a password and you type your GitHub password, you get: <code>Password authentication is not supported</code>. GitHub requires a <strong>Personal Access Token (PAT)</strong> instead. The simplest fix is to push through <strong>GitHub Desktop</strong>, which is already logged in. To use the terminal, create a token at <code>github.com/settings/tokens</code> (classic, scope <code>repo</code>) and paste it when asked for the password.</p>
+</div>
+
+<div class="call warn">
+  <div class="t">🔴 Warning — "A lock file already exists" / index.lock</div>
+  <p>If a previous git command was interrupted (or GitHub Desktop and the terminal ran at the same time), you may see <code>Unable to create '.git/index.lock': File exists</code>. Close GitHub Desktop, then remove the stale lock and retry:</p>
+  <pre style="margin-top:8px"><code>rm -f ~/Documents/GitHub/Cryo3d-editor/.git/index.lock</code></pre>
+</div>
+
+<div class="call note">
+  <div class="t">🟣 Note — keep code out of cloud-sync folders</div>
+  <p>Avoid keeping a git repository inside OneDrive/Dropbox/iCloud. The sync service touches the hidden <code>.git</code> folder at the same time as git and can corrupt it (you will see "Operation not permitted" warnings). Keep repositories in a plain folder like <code>~/Documents/GitHub/</code>.</p>
+</div>
+
+<!-- ===================== PART 5 ===================== -->
+<h2 id="p5">5 · Updating the plugin (everyday workflow)</h2>
+
+<p>After the first publish, the routine for every future change is short and always the same three actions: <span class="pill">edit</span> → <span class="pill">commit</span> → <span class="pill">push</span>.</p>
+
+<ol>
+  <li><strong>Edit</strong> the code (e.g. fix a bug in <code>_widget.py</code>). If you installed with <code>pip install -e .</code>, just restart napari to see the change — no reinstall.</li>
+  <li><strong>Commit</strong> the snapshot with a message describing <em>what</em> and <em>why</em>:
+    <pre style="margin-top:8px"><code>cd ~/Documents/GitHub/Cryo3d-editor
+git add -A
+git commit -m "Fix napari 0.7 colormap reset (KeyError: colors)"</code></pre>
+  </li>
+  <li><strong>Push</strong> to GitHub so others get the update:
+    <pre style="margin-top:8px"><code>git push</code></pre>
+  </li>
+</ol>
+
+<div class="call key">
+  <div class="t">🔵 Key concept — write commit messages for your future self</div>
+  <p>A good message says what changed and why, e.g. <code>Fix Qt6 compatibility (vispy backend detected via qtpy)</code>. Six months later, the history becomes a readable changelog instead of a wall of "update" messages.</p>
+</div>
+
+<h3>Bumping the version</h3>
+<p>When you make a meaningful release, raise the version number in <strong>two</strong> places so they stay in sync: <code>pyproject.toml</code> (<code>version = "3.1.0"</code>) and <code>src/napari_cryo3d_editor/__init__.py</code> (<code>__version__ = "3.1.0"</code>). Then commit and push.</p>
+
+<!-- ===================== PART 6 ===================== -->
+<h2 id="p6">6 · Troubleshooting</h2>
+
+<table>
+  <tr><th>Symptom</th><th>Cause</th><th>Solution</th></tr>
+  <tr><td><code>No matching distribution found for napari-cryo3d-editor</code></td><td>Package is not on PyPI</td><td>Install from local (<code>pip install -e .</code>) or GitHub (<code>pip install "git+https://…"</code>)</td></tr>
+  <tr><td><code>Password authentication is not supported</code></td><td>GitHub removed password login for git</td><td>Push via GitHub Desktop, or use a Personal Access Token as the password</td></tr>
+  <tr><td><code>Unable to create '.git/index.lock'</code></td><td>A previous git process left a stale lock</td><td>Close GitHub Desktop, then <code>rm -f .git/index.lock</code> and retry</td></tr>
+  <tr><td><code>Operation not permitted</code> on <code>.git/…</code></td><td>Repo is inside a cloud-sync folder (OneDrive)</td><td>Move the repo to a plain local folder (e.g. <code>~/Documents/GitHub</code>)</td></tr>
+  <tr><td>First <code>git push</code> rejected (non-fast-forward)</td><td>GitHub repo was created <em>with</em> a README/license</td><td>Recreate the GitHub repo empty, or run <code>git pull --rebase origin main</code> then push</td></tr>
+  <tr><td>Plugin missing from the Plugins menu</td><td>Not installed in the active environment, or manifest pointer wrong</td><td>Re-run <code>pip install -e .</code> in the right env; check <code>napari.yaml</code> points to a real class</td></tr>
+  <tr><td><code>KeyError: 'colors'</code> when resetting colours</td><td>napari 0.7 changed the Labels colormap API</td><td>Update to the latest plugin version (uses <code>label_colormap()</code> instead of <code>'auto'</code>)</td></tr>
+  <tr><td>Crash on Qt6 / napari 0.7</td><td>An old version pinned PyQt5</td><td>Update the plugin; it now detects the Qt binding via <code>qtpy</code> and does not pin Qt5</td></tr>
+</table>
+
+<!-- ===================== PART 7 ===================== -->
+<h2 id="p7">7 · Command summary &amp; glossary</h2>
+
+<h3>Command summary</h3>
+<table>
+  <tr><th>Command</th><th>Purpose</th><th>When you run it</th></tr>
+  <tr><td><code>git init</code></td><td>Turn a folder into a git repository</td><td>Once, at the start</td></tr>
+  <tr><td><code>git add -A</code></td><td>Stage all changes for the next snapshot</td><td>Before every commit</td></tr>
+  <tr><td><code>git commit -m "msg"</code></td><td>Record a snapshot with a message</td><td>After each meaningful change</td></tr>
+  <tr><td><code>git remote add origin &lt;url&gt;</code></td><td>Link the local repo to GitHub</td><td>Once, after creating the GitHub repo</td></tr>
+  <tr><td><code>git push</code></td><td>Upload commits to GitHub</td><td>After committing</td></tr>
+  <tr><td><code>git status</code></td><td>Show what changed and what is staged</td><td>Anytime, to check state</td></tr>
+  <tr><td><code>git log --oneline</code></td><td>Show the commit history compactly</td><td>To review past changes</td></tr>
+  <tr><td><code>pip install -e .</code></td><td>Install the plugin in editable mode</td><td>Once per environment</td></tr>
+</table>
+
+<h3>Glossary</h3>
+<table>
+  <tr><th>Term</th><th>Meaning</th></tr>
+  <tr><td><strong>napari</strong></td><td>Open-source n-dimensional image viewer for scientific data.</td></tr>
+  <tr><td><strong>Plugin</strong></td><td>Add-on software that extends napari with new tools/panels.</td></tr>
+  <tr><td><strong>npe2</strong></td><td>napari plugin engine 2 — the current standard for declaring plugins via <code>napari.yaml</code>.</td></tr>
+  <tr><td><strong>Manifest</strong></td><td>The <code>napari.yaml</code> file that tells napari what the plugin contributes.</td></tr>
+  <tr><td><strong>Repository (repo)</strong></td><td>A project folder tracked by git, including its full history.</td></tr>
+  <tr><td><strong>Commit</strong></td><td>A saved snapshot of the project at a point in time, with a message.</td></tr>
+  <tr><td><strong>Remote / origin</strong></td><td>The online copy of the repo (on GitHub). "origin" is its default nickname.</td></tr>
+  <tr><td><strong>Push / Pull</strong></td><td>Upload local commits to / download remote commits from GitHub.</td></tr>
+  <tr><td><strong>PAT</strong></td><td>Personal Access Token — a secret string used instead of a password for git over HTTPS.</td></tr>
+  <tr><td><strong>PyPI</strong></td><td>Python Package Index — the service behind <code>pip install &lt;name&gt;</code> by short name.</td></tr>
+  <tr><td><strong>Editable install</strong></td><td><code>pip install -e .</code> — links to your source so edits apply without reinstalling.</td></tr>
+  <tr><td><strong>MRC</strong></td><td>The volumetric image format used in cryo-EM/ET (<code>.mrc</code>/<code>.rec</code>), with voxel size stored in its header.</td></tr>
+</table>
+
+<div class="foot">
+  <p><strong>Project:</strong> Cryo3D Editor — napari plugin for cryo-ET segmentation editing &nbsp;·&nbsp; <strong>Repository:</strong> <a href="https://github.com/lifeviewspace/cryo3d-editor">github.com/lifeviewspace/cryo3d-editor</a></p>
+  <p><strong>References:</strong> napari plugin docs — <a href="https://napari.org/stable/plugins/index.html">napari.org/stable/plugins</a> &nbsp;·&nbsp; GitHub Docs — <a href="https://docs.github.com/get-started">docs.github.com/get-started</a> &nbsp;·&nbsp; Author: Kennedy Bonjour (lifeviewspace).</p>
+</div>
+
+</div>
+</body>
+</html>
