@@ -142,6 +142,12 @@ that are too thick. This tab cleans both.
 > **Always Preview before Apply.** Preview shows the result without changing your
 > data. Only **✓ Apply** edits the layer; use **↶ Undo** (STATUS section) to revert.
 
+![Original segmentation](images/tut/wf_dust_before.png)
+*Original segmentation, before cleaning.*
+
+![Preview after Hide Dust](images/tut/wf_dust_after.png)
+*Preview after **Hide Dust** — the small specks are gone.*
+
 ---
 
 ## 6. ✂️ Erase — paint out regions
@@ -162,6 +168,10 @@ and delete whatever it covers.
 > with napari's brush slider or the <kbd>[</kbd> / <kbd>]</kbd> keys.
 
 ![Painting on the segmentation in napari](images/tut/img6.png)
+
+![Erasing an unknown segmentation](images/tut/wf_erase.png)
+*Erasing the unknown segmentation — paint a mask, then **Apply Erase**. You can
+also erase portions directly with napari's own brush tools.*
 
 ---
 
@@ -186,6 +196,9 @@ over-segmentation.
 > press **🔗 Merge** so they become a single object before measuring or exporting.
 
 ![Coloured segmentation with the plugin panel](images/tut/img9.png)
+
+![Selecting and changing label colours](images/tut/wf_colors.png)
+*Colorizing the labels/membranes — select a label and change its colour.*
 
 ---
 
@@ -217,6 +230,16 @@ rendering mode. This tab also exports your results.
 > into its header (nm → Å) and chooses the right data type automatically:
 > `int16` for label masks, `int8` for binary masks, `float32` for tomograms.
 > It opens correctly in IMOD, ChimeraX and napari.
+
+![Visualizing the cleaned segmentation in 3D](images/tut/wf_view3d.png)
+*Visualizing the cleaned segmentation in 3D (toggle 2D/3D with napari's
+dimension-display button).*
+
+![Saving the canvas through snapshot](images/tut/wf_snapshot.png)
+*Saving the canvas image through **Save Snapshot…**.*
+
+![Saving the cleaned segmentation as an MRC file](images/tut/wf_save_mrc.png)
+*Saving the cleaned segmentation as an `.mrc` file.*
 
 ---
 
