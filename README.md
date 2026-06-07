@@ -15,6 +15,9 @@ The plugin adds a dockable **Cryo3D Editor** widget with five tabs:
 
 Optional GPU acceleration via CuPy is detected automatically when available.
 
+📖 **New here? See the illustrated [User Guide (USAGE.md)](USAGE.md)** — how to
+load data, open the plugin, and use each tab, with screenshots.
+
 ## Installation
 
 Requires Python ≥ 3.9 and a Qt backend (e.g. PyQt5).
