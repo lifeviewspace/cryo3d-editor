@@ -548,7 +548,20 @@ class PluginState:
     def _rgba_float_to_int(self, rgba_float):
         return tuple(int(c * 255) for c in rgba_float)
 
+    def _ensure_colors_initialized(self, layer_name):
+        """Give every existing label a colour the first time we touch this
+        layer. Without this, switching to a DirectLabelColormap that only
+        lists the edited label would make every OTHER label transparent
+        (they vanish from the canvas)."""
+        if not hasattr(self, "_color_init_done"):
+            self._color_init_done = set()
+        if layer_name in self._color_init_done:
+            return
+        self._color_init_done.add(layer_name)
+        self.initialize_layer_colors(layer_name)
+
     def set_label_color(self, layer_name, label_value, color_rgba):
+        self._ensure_colors_initialized(layer_name)
         if layer_name not in self.label_colors:
             self.label_colors[layer_name] = {}
         self.label_colors[layer_name][label_value] = self._rgba_int_to_float(color_rgba)
@@ -580,7 +593,11 @@ class PluginState:
         if not colors:
             return
         if HAS_DIRECT_COLORMAP:
-            color_dict = {0: (0, 0, 0, 0)}
+            # `None` is the fallback colour for any label not explicitly
+            # listed. We keep it transparent only for value 0 (background);
+            # all real labels are filled in by _ensure_colors_initialized so
+            # nothing disappears when a single label is recoloured.
+            color_dict = {0: (0, 0, 0, 0), None: (0, 0, 0, 0)}
             color_dict.update(colors)
             try:
                 layer.colormap = DirectLabelColormap(color_dict=color_dict)
@@ -619,7 +636,11 @@ class PluginState:
         layer = self.get_labels_layer(layer_name)
         if layer is None:
             return
-        existing_labels = set(np.unique(layer.data[layer.data > 0]))
+        # Avoid boolean fancy-indexing (layer.data[layer.data>0]) which
+        # allocates a full-size copy of huge tomograms; filter the small
+        # unique array instead.
+        uniq = np.unique(layer.data)
+        existing_labels = set(int(v) for v in uniq if v > 0)
         if not existing_labels:
             return
         if layer_name not in self.label_colors:
@@ -1605,7 +1626,8 @@ class ColorTab(QWidget):
         layer = self._get_layer()
         if not layer:
             return
-        for lbl in np.unique(layer.data[layer.data > 0]):
+        _uniq = np.unique(layer.data)
+        for lbl in _uniq[_uniq > 0]:
             item = QListWidgetItem(f"Label {int(lbl)}")
             item.setData(Qt.UserRole, int(lbl))
             color = self.state.get_label_color(layer.name, int(lbl))
