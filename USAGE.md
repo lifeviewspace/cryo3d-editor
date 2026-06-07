@@ -224,24 +224,35 @@ rendering mode. This tab also exports your results.
 
 **Why:** 3D structures are far clearer in motion. This tab has two sub-tabs.
 
-**Keyframe Movie**
+![Movie tab](images/tut/movie_tab.png)
 
-1. **1 ▸ Capture Keyframes** — set the 3D view, click **📸 Capture Current
-   State**, and repeat for each viewpoint.
-2. **2 ▸ Keyframes** — reorder with **↑/↓**, replace with **🔄 Update Selected**,
-   or **🗑 Clear All**.
-3. **3 ▸ Settings** — format (`MP4`, `GIF`, `PNG Sequence`), interpolation
-   (`Smoothstep`, `Linear`, `Ease-in`, `Ease-out`), and fps.
-4. **4 ▸ Preview & Export** — **▶ Preview**, then **💾 Export Movie…**.
+**Keyframe Movie** — animate a camera path between viewpoints you choose.
 
-**Spin Movie**
+1. **1 ▸ Capture Keyframes** — set the 3D view (rotate, zoom, pick the slice),
+   then click **📸 Capture Current State**. Repeat for each viewpoint; the panel
+   shows a thumbnail per keyframe (KF 1, KF 2, …). You need **at least two**.
+2. **2 ▸ Keyframes** — reorder with **↑/↓**, replace one with **🔄 Update
+   Selected**, set **Duration** (frames between this keyframe and the next), or
+   **🗑 Clear All**.
+3. **3 ▸ Settings** — **Format** (`MP4`, `GIF`, `PNG Sequence`), **Interpolation**
+   (`Smoothstep`, `Linear`, `Ease-in`, `Ease-out`), and **FPS**.
+4. **4 ▸ Preview & Export** — **▶ Preview** plays the path on the canvas (**■ Stop**
+   to interrupt). When happy, click **💾 Export Movie…** and choose where to save.
+
+![Keyframe preview](images/tut/movie_preview.gif)
+
+**Spin Movie** — one-click automatic 360° turntable.
 
 1. **1 ▸ Rotation Settings** — pick the axis (`Y`, `X`, `Z`) and output format.
-2. **2 ▸ Export** — click **🌀 Start Spin Movie…** for an automatic 360°
-   rotation. **✕ Cancel** stops it.
+2. **2 ▸ Export** — click **🌀 Start Spin Movie…**. **✕ Cancel** stops it.
 
 > **Set up the look first** in the Render tab — the movie records exactly what is
-> on the canvas.
+> on the canvas (colours, opacity, rendering mode).
+
+> **MP4 won't open?** Exports use H.264 + `yuv420p`, which plays in QuickTime,
+> VLC and browsers. If an export ever fails, the status bar shows *"Export
+> failed — see terminal log"* and the full error is printed in the terminal you
+> launched napari from — copy that text when reporting an issue.
 
 ---
 
@@ -268,6 +279,8 @@ Use **Undo** freely at any stage.
 | Plugin missing from the Plugins menu | Re-run `pip install -e .` in the active environment |
 | 3D view is slow or hangs on large volumes | Switch to 2D, reduce canvas size, or crop the region |
 | Colours look wrong after editing (napari 0.7) | Press **🔄 Reset Colors**; make sure you're on the latest version |
+| Movie export fails or the MP4 won't play | Make sure `imageio-ffmpeg` is installed; check the terminal for the printed traceback. Frames are auto-resized to even dimensions, so a mid-export crash is usually a missing ffmpeg backend |
+| Exported video is blank/grey | The movie records the canvas — set the view in **Render** first and keep the napari window visible during export |
 
 ---
 
