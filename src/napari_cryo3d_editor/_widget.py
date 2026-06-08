@@ -549,7 +549,11 @@ class PluginState:
         self.label_opacities: Dict[str, Dict[int, float]] = {}
 
     def scale(self):
-        return (self.voxel_nm,) * 3
+        # napari's MRC readers (e.g. napari-mrcfile-reader) set the layer
+        # scale in Angstrom, straight from the MRC header. We match that so
+        # plugin-loaded layers line up with File > Open layers and report the
+        # same pixel size. voxel_nm stays in nm for volume/threshold maths.
+        return (self.voxel_nm * 10.0,) * 3
 
     def rm(self, name):
         if self.viewer and name in self.viewer.layers:
@@ -980,6 +984,7 @@ class HideDustTab(QWidget):
         row.addWidget(_lbl("Layer:"))
         self.combo_layer = QComboBox()
         self.combo_layer.setStyleSheet(INPUT_STYLE)
+        self.combo_layer.currentTextChanged.connect(self._sync_voxel_from_layer)
         row.addWidget(self.combo_layer)
         btn_r = _btn("↻", "secondary")
         btn_r.setFixedWidth(30)
@@ -1143,6 +1148,29 @@ class HideDustTab(QWidget):
     def _get_layer(self):
         name = self.combo_layer.currentText()
         return self.state.get_labels_layer(name) if name and name != "—" else None
+
+    def _sync_voxel_from_layer(self, name=None):
+        """Read the pixel size from the selected layer's napari scale.
+
+        napari / its MRC readers store the scale in Angstrom, so we divide
+        by 10 to get nm. This keeps the plugin in sync with layers opened
+        via File > Open (otherwise voxel size would stay at the 1.0 default)."""
+        layer = self._get_layer()
+        if layer is None:
+            return
+        try:
+            sc = [float(s) for s in np.atleast_1d(layer.scale) if float(s) > 0]
+            if not sc:
+                return
+            voxel_nm = (sum(sc) / len(sc)) / 10.0   # Angstrom -> nm, mean of axes
+            if voxel_nm <= 0 or abs(voxel_nm - self.state.voxel_nm) < 1e-6:
+                return
+            self.state.voxel_nm = voxel_nm
+            self.spin_voxel.blockSignals(True)
+            self.spin_voxel.setValue(round(voxel_nm, 4))
+            self.spin_voxel.blockSignals(False)
+        except Exception:
+            pass
 
     def _on_metric_changed(self, text):
         is_rank = 'rank' in text
