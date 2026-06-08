@@ -37,12 +37,6 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-### Optional GPU support (NVIDIA, CUDA 12.x)
-
-```bash
-pip install "napari-cryo3d-editor[gpu]"
-```
-
 ## Usage
 
 1. Launch napari: `napari`
@@ -58,7 +52,10 @@ python -m napari_cryo3d_editor._widget
 ## Dependencies
 
 Core: napari, numpy, scipy, scikit-image, qtpy, mrcfile, imageio,
-imageio-ffmpeg, tifffile. Optional: cupy (GPU).
+imageio-ffmpeg, tifffile.
+
+Optional GPU acceleration (NVIDIA, CUDA 12.x): `pip install cupy-cuda12x`.
+Not available on Apple Silicon — the plugin falls back to CPU automatically.
 
 ## License
 

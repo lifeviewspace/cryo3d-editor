@@ -38,8 +38,9 @@ pip install "git+https://github.com/lifeviewspace/cryo3d-editor.git"
 ```
 
 > A Qt backend (PyQt5/PyQt6) is required — napari already provides one.
-> The `[gpu]` extra (CuPy) is optional and **not** available on Apple Silicon;
-> the plugin always falls back to CPU.
+> GPU acceleration is optional: on an NVIDIA machine with CUDA 12.x install
+> CuPy with `pip install cupy-cuda12x`. It is **not** available on Apple
+> Silicon; the plugin always falls back to CPU.
 
 ---
 
