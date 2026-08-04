@@ -330,6 +330,151 @@ def _open_movie_writer(path, fmt, fps):
     return imageio.get_writer(str(path), fps=max(10, fps), mode="I")
 
 
+# ====================================================================
+# MESH I/O  (OBJ / PLY  ->  napari Surface layer)
+# ====================================================================
+
+def _parse_obj(path):
+    """Wavefront OBJ (ASCII). Returns (verts Nx3 float32, faces Mx3 int64).
+    Handles 'v x y z [...]' and 'f a b c' / 'f a/b/c ...'; OBJ is 1-indexed."""
+    verts, faces = [], []
+    with open(path, 'r', errors='ignore') as fh:
+        for line in fh:
+            if line[:2] == 'v ':
+                p = line.split()
+                verts.append(p[1]); verts.append(p[2]); verts.append(p[3])
+            elif line[:2] == 'f ':
+                p = line.split()
+                # triangulate polygons as a fan; strip texture/normal refs
+                idx = [tok.split('/')[0] for tok in p[1:]]
+                for k in range(1, len(idx) - 1):
+                    faces.append(idx[0]); faces.append(idx[k]); faces.append(idx[k + 1])
+    V = np.array(verts, dtype=np.float32).reshape(-1, 3)
+    F = np.array(faces, dtype=np.int64).reshape(-1, 3) - 1   # 1-indexed -> 0
+    return V, F
+
+
+def _parse_ply(path):
+    """PLY reader. ASCII fully supported (x y z [...] + face lists).
+    Binary falls back to trimesh/meshio if available, else a clear error."""
+    with open(path, 'rb') as fh:
+        if fh.readline().strip() != b'ply':
+            raise ValueError("Not a PLY file")
+        fmt = None; n_vert = n_face = 0; cur = None
+        while True:
+            ln = fh.readline()
+            if not ln:
+                raise ValueError("Unexpected EOF in PLY header")
+            t = ln.split()
+            if not t:
+                continue
+            if t[0] == b'format':
+                fmt = t[1].decode()
+            elif t[0] == b'element':
+                if t[1] == b'vertex':
+                    n_vert = int(t[2]); cur = 'v'
+                elif t[1] == b'face':
+                    n_face = int(t[2]); cur = 'f'
+                else:
+                    cur = None
+            elif t[0] == b'end_header':
+                break
+        if fmt and 'ascii' not in fmt:
+            # binary PLY: defer to a library if present
+            try:
+                import trimesh
+                m = trimesh.load(path, process=False)
+                return (np.asarray(m.vertices, np.float32),
+                        np.asarray(m.faces, np.int64))
+            except Exception:
+                raise ValueError(
+                    "Binary PLY needs the 'trimesh' package "
+                    "(pip install trimesh). ASCII PLY works out of the box.")
+        rest = fh.read().decode('ascii', 'ignore').split('\n')
+    vtoks = rest[:n_vert]
+    V = np.array([l.split()[:3] for l in vtoks], dtype=np.float32)
+    F = np.empty((n_face, 3), dtype=np.int64)
+    j = 0
+    for l in rest[n_vert:]:
+        p = l.split()
+        if len(p) < 4:
+            continue
+        cnt = int(p[0])
+        base = int(p[1])
+        for k in range(2, cnt):           # fan-triangulate faces with >3 verts
+            F[j, 0] = base; F[j, 1] = int(p[k]); F[j, 2] = int(p[k + 1]); j += 1
+        if j >= n_face:
+            break
+    return V, F[:j]
+
+
+def load_mesh(path):
+    """Dispatch by extension. Returns (verts Nx3 float32 in z,y,x order,
+    faces Mx3 int64)."""
+    low = str(path).lower()
+    if low.endswith('.obj'):
+        V, F = _parse_obj(path)
+    elif low.endswith('.ply'):
+        V, F = _parse_ply(path)
+    else:
+        # last resort: trimesh handles stl/off/glb/etc.
+        import trimesh
+        m = trimesh.load(path, process=False)
+        V = np.asarray(m.vertices, np.float32); F = np.asarray(m.faces, np.int64)
+    # OBJ/PLY store vertices as (x, y, z); napari volumes are indexed (z, y, x).
+    V = np.ascontiguousarray(V[:, [2, 1, 0]])
+    return V, F
+
+
+def _reference_scale(viewer):
+    """Scale of an existing 3D Image/Labels layer so a mesh overlays it.
+    Falls back to unit scale (the mesh is in voxel-index coordinates)."""
+    if viewer is not None:
+        for lyr in viewer.layers:
+            try:
+                if isinstance(lyr, (Image, Labels)) and np.asarray(lyr.data).ndim >= 3:
+                    return tuple(float(s) for s in lyr.scale[:3])
+            except Exception:
+                continue
+    return (1.0, 1.0, 1.0)
+
+
+def _safe_set_3d(viewer):
+    """Switch the viewer to 3D, working around a napari bug (issues #7152/#7918)
+    where toggling 3D with 'continuous' auto-contrast on a 3D Image raises in
+    _update_thumbnail. We freeze continuous auto-contrast on Image layers first."""
+    if viewer is None:
+        return
+    for lyr in viewer.layers:
+        if isinstance(lyr, Image):
+            try:
+                lyr._keep_auto_contrast = False
+            except Exception:
+                pass
+    try:
+        viewer.dims.ndisplay = 3
+    except Exception:
+        pass
+
+
+class MeshLoadWorker(QThread):
+    """Parse a (possibly large) mesh off the GUI thread."""
+    done = Signal(object, object, str)   # verts, faces, name
+    failed = Signal(str)
+
+    def __init__(self, path, parent=None):
+        super().__init__(parent)
+        self.path = path
+
+    def run(self):
+        try:
+            V, F = load_mesh(self.path)
+            name = Path(self.path).stem
+            self.done.emit(V, F, name)
+        except Exception:
+            self.failed.emit(traceback.format_exc())
+
+
 _HARDWARE_CHECKED = False
 
 def check_hardware():
@@ -1176,13 +1321,46 @@ class HideDustTab(QWidget):
         is_rank = 'rank' in text
         self.label_thresh.setText("Top N:" if is_rank else f"Min {text}:")
 
+    def _load_mesh_as_surface(self, path):
+        """Load an OBJ/PLY mesh as a napari Surface layer."""
+        from qtpy.QtWidgets import QApplication as _QA
+        _QA.setOverrideCursor(Qt.WaitCursor)
+        try:
+            verts, faces = load_mesh(path)
+            d = verts[:, 0].astype(np.float32)
+            rng = float(d.max() - d.min()) or 1.0
+            vals = (d - d.min()) / rng
+            stem = Path(path).stem
+            nm = stem
+            ex = {l.name for l in self.state.viewer.layers}
+            i = 2
+            while nm in ex:
+                nm = f"{stem}_{i}"; i += 1
+            self.state.viewer.add_surface((verts, faces, vals), name=nm,
+                                          scale=_reference_scale(self.state.viewer),
+                                          shading='smooth', colormap='viridis')
+            _safe_set_3d(self.state.viewer)
+            log("Mesh loaded (Surface)", params={"name": nm,
+                                                 "verts": len(verts), "faces": len(faces)})
+            show_info(f"Mesh loaded: {nm}  ({len(verts):,} verts)")
+        except Exception:
+            show_error("Mesh load failed:\n" + traceback.format_exc().strip().splitlines()[-1])
+            print(traceback.format_exc())
+        finally:
+            _QA.restoreOverrideCursor()
+
     def _load_file(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Load Segmentation",
-                                               "", "Seg Files (*.mrc *.tif *.tiff *.npy);;All (*)")
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Load Segmentation / Mesh", "",
+            "Seg & Mesh (*.mrc *.tif *.tiff *.npy *.obj *.ply);;All (*)")
         if not path:
             return
         try:
             p = Path(path)
+            # Mesh files -> load as a napari Surface layer (not a Labels volume)
+            if p.suffix.lower() in ('.obj', '.ply'):
+                self._load_mesh_as_surface(path)
+                return
             pixel_nm = None   # will be set if metadata found
 
             if p.suffix in ('.tif', '.tiff'):
@@ -2064,9 +2242,66 @@ class RenderTab(QWidget):
         g7.setLayout(l7)
         layout.addWidget(g7)
 
+        # ── 8. LOAD MESH (OBJ / PLY) ──────────────────────────────────
+        g8 = _group("8 ▸ LOAD MESH (OBJ / PLY)")
+        l8 = QVBoxLayout()
+        l8.addWidget(_info("Load a 3D surface mesh as a napari Surface layer "
+                           "(for rendering & Movie). Supports .obj and .ply."))
+        btn_mesh = _btn("🧩  Load Mesh…", "run")
+        btn_mesh.clicked.connect(self._load_mesh_dialog)
+        l8.addWidget(btn_mesh)
+        self.lbl_mesh = _info_box("—")
+        l8.addWidget(self.lbl_mesh)
+        g8.setLayout(l8)
+        layout.addWidget(g8)
+
         layout.addStretch()
         self.setLayout(layout)
         self._refresh_layers()
+
+    # ── Mesh loading ──────────────────────────────────────────────────
+
+    def _load_mesh_dialog(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Load Mesh", "", "Meshes (*.obj *.ply);;All files (*)")
+        if not path:
+            return
+        self.lbl_mesh.setText(f"Loading {Path(path).name} …")
+        QApplication.processEvents()
+        self._mesh_worker = MeshLoadWorker(path)
+        self._mesh_worker.done.connect(self._on_mesh_loaded)
+        self._mesh_worker.failed.connect(self._on_mesh_error)
+        self._mesh_worker.start()
+
+    def _on_mesh_loaded(self, verts, faces, name):
+        try:
+            # depth-shaded values so the surface reads as 3D; smooth normals
+            d = verts[:, 0].astype(np.float32)
+            rng = float(d.max() - d.min()) or 1.0
+            values = (d - d.min()) / rng
+            existing = {l.name for l in self.state.viewer.layers}
+            nm = name
+            i = 2
+            while nm in existing:
+                nm = f"{name}_{i}"; i += 1
+            self.state.viewer.add_surface(
+                (verts, faces, values), name=nm,
+                scale=_reference_scale(self.state.viewer), shading='smooth',
+                colormap='viridis')
+            # meshes are usually 3D — flip the viewer into 3D so it's visible
+            _safe_set_3d(self.state.viewer)
+            self.lbl_mesh.setText(
+                f"Loaded {nm}: {len(verts):,} verts / {len(faces):,} faces")
+            log("Mesh loaded", params={"name": nm, "verts": len(verts),
+                                       "faces": len(faces)})
+            self._refresh_layers()
+        except Exception as e:
+            self._on_mesh_error(traceback.format_exc())
+
+    def _on_mesh_error(self, msg):
+        print(msg)
+        self.lbl_mesh.setText("Mesh load failed — see terminal log")
+        show_error("Mesh load failed:\n" + msg.strip().splitlines()[-1])
 
     # ── Helpers ───────────────────────────────────────────────────────
 
@@ -2879,15 +3114,30 @@ class AnimationTab(QWidget):
                 vispy_cam._event_value = None
         except Exception:
             pass
-        viewer.dims.ndisplay = kf.dims['ndisplay']
+        try:
+            viewer.dims.ndisplay = kf.dims['ndisplay']
+        except Exception:
+            pass
         if len(kf.dims['point']) > 0:
-            viewer.dims.point = tuple(float(v) for v in kf.dims['point'])
+            try:
+                viewer.dims.point = tuple(float(v) for v in kf.dims['point'])
+            except Exception:
+                pass
+        # Wrap each property set: some napari versions raise inside
+        # _update_thumbnail (ndi.zoom bug on 3D layers) AFTER the value is
+        # already applied, which would otherwise abort the whole animation.
         for name, visible in kf.layer_visibility.items():
             if name in viewer.layers:
-                viewer.layers[name].visible = visible
+                try:
+                    viewer.layers[name].visible = visible
+                except Exception:
+                    pass
         for name, opacity in kf.layer_opacity.items():
             if name in viewer.layers:
-                viewer.layers[name].opacity = opacity
+                try:
+                    viewer.layers[name].opacity = opacity
+                except Exception:
+                    pass
 
     def _capture_keyframe(self):
         kf = self._capture_full_state()

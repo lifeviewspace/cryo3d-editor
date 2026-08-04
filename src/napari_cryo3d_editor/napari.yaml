@@ -5,6 +5,13 @@ contributions:
     - id: napari-cryo3d-editor.make_widget
       python_name: napari_cryo3d_editor._widget:Cryo3DEditorWidget
       title: Open Cryo3D Editor
+    - id: napari-cryo3d-editor.get_reader
+      python_name: napari_cryo3d_editor._reader:napari_get_reader
+      title: Read OBJ/PLY meshes
   widgets:
     - command: napari-cryo3d-editor.make_widget
       display_name: Cryo3D Editor
+  readers:
+    - command: napari-cryo3d-editor.get_reader
+      filename_patterns: ['*.obj', '*.ply']
+      accepts_directories: false
